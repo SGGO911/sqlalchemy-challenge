@@ -105,6 +105,7 @@ def tobs():
 #When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
 #When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive
 
+
 @app.route("/api/v1.0/<start>", defaults={'end': ""})
 @app.route("/api/v1.0/<start>/<end>")
 def start(start,end ):
@@ -114,10 +115,12 @@ def start(start,end ):
         print("EndDate",end)
     session = Session(engine)
 
-    results = session.query(Measurement.date,Measurement.station,Measurement.tobs).filter(Measurement.date.between(start , end)).all()
+    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date>=start).filter(Measurement.date<end).all()
+    results_list = list(np.ravel(results))
 
+    return jsonify(results_list)
 
-    return jsonify(results)
+    
 
 
 
